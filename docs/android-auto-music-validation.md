@@ -60,4 +60,21 @@ adb -s localhost:5555 shell cmd appops set --user 0 app.morphe.android.apps.yout
 
 최종 v8 테스트 APK에서 재생목록의 `더 보기` 다음 페이지 안의 곡, 최근 감상 및 추천 항목을 직접 선택해 재생 시간 증가를 확인했다. PC에서는 일반 브라우저 영상도 무음이라고 사용자가 확인하여 실제 청취 검증은 남아 있다. 테스트 종료 시에는 앱을 일시정지한다.
 
+## Galaxy Modes and playback without opening the app
+
+On 2026-09-10, the v8 test APK was checked on Android 16 with Samsung Modes and Routines 5.0.04.0. Playback restoration was tested separately from selecting a song in DHU. Android Auto's automatic music start remained disabled.
+
+| Starting state | Trigger | Observed result |
+| --- | --- | --- |
+| Service available, playback paused | Manually triggered mode targeting Music Auto Lab | Playback resumed and the position advanced. |
+| Background process terminated with `am kill`, package still `stopped=false` | Manual mode after Android recreated the browser service | The saved queue was restored and playback resumed through a foreground media playback service. |
+| App force-stopped in app settings | Manual mode targeting Music Auto Lab | No playback; the package remained stopped. |
+| App force-stopped | Privileged shell request to start the foreground browser service with a PLAY key event | The saved 25-entry queue was restored and playback advanced without launching an Activity. |
+
+The process-termination test is not evidence that the mode alone can start an absent process: Android had already recreated the service before the mode ran. The privileged test used a fixed target component, `ACTION_MEDIA_BUTTON`, a `KEYCODE_MEDIA_PLAY` event, and `FLAG_INCLUDE_STOPPED_PACKAGES`. Starting the service without a media event only prepared an inactive session. An ordinary background `am startservice` request was rejected in this environment.
+
+These checks used no Activity launch or hidden display workaround. Playback was paused after each test. They establish short service-only playback in this configuration, not a completed phone-only automation for recovery after force-stop. Long locked-screen playback, Android Auto connection timing, actual vehicle behavior, and audible output remain unverified.
+
+Treat force-stop separately from normal process termination when reproducing failures. Android 15 and later cancel an app's pending intents on force-stop; see [Android stopped-state changes](https://developer.android.com/about/versions/15/behavior-changes-all#stopped-state). Keep private device logs, account responses, extracted APKs, and signing material out of commits.
+
 참고: [Google DHU 안내](https://developer.android.com/training/cars/testing/dhu), [목록 표시 스타일](https://developer.android.com/training/cars/media/create-media-browser/content-styles), [Morphe 목록 복원 기여 PR](https://github.com/MorpheApp/morphe-patches/pull/2489). 이 PR의 코드를 기반으로 확장한 로컬 실험이며, 공식 병합 또는 배포를 의미하지 않는다.
