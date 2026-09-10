@@ -30,6 +30,8 @@ Step-by-step guides for using Morphe. If you are new here, start with the first 
 
 ## 🧰 Maintenance
 
+- **[YouTube Music Android Auto browse validation](android-auto-music-validation.md)** - experimental patch scope and PC Desktop Head Unit checks (Korean).
+
 - **[Backing up Morphe and your keystore](backup-and-keystore.md)** - why the keystore
   matters, and how to move everything to another device.
 - **[Storage and saved data](storage-and-saved-data.md)** - what Morphe keeps on your device,
